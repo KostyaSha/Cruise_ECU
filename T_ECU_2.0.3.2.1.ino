@@ -109,7 +109,7 @@ int get_angle() {
       }
       break;
 
-    case 0x343:
+    case 0x200:
       lastmillis = millis();
       uint8_t dat[8];
       for (int ii = 0; ii <= 7; ii++) {
@@ -122,7 +122,7 @@ int get_angle() {
           Serial.println("Line 118 CANCEL!");
         }
         //bitwise math to get target accel value in m/s^2
-        gas = (dat[0] << 8 | dat[1] << 0);
+        gas = ((dat[0] << 8 | dat[1] << 0)-477);
         
         //clip if gas exceeds limits
         if ((gas >= 0) && (gas < 3000)) {
@@ -132,7 +132,7 @@ int get_angle() {
       
       else {
    Serial.println("BRAKE ln 131");
-//     controls_allowed = false;
+     controls_allowed = false;
      angle = 0;
       }
       break;      
@@ -142,7 +142,7 @@ int get_angle() {
 
   
 // SAFETY CHECK - did we recieve 343 in a reasonable amount of time?
- if ((millis() - lastmillis) > 10000) {
+ if ((millis() - lastmillis) > 1000) {
       Serial.println("ERROR Line 143 BAD CHECKSUM 0x343");
       controls_allowed = false;
       gas = 0;
