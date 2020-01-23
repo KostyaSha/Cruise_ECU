@@ -26,6 +26,7 @@ int angle = 0;
 unsigned long lastmillis = 0;
 unsigned long lagtime = 0;
 
+// *****************************************************************
 void setup() {
   pinMode(interruptPin, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(interruptPin), cancel, LOW);
@@ -37,21 +38,14 @@ void setup() {
     pinMode(M_pin2, OUTPUT);
     pinMode(solenoid_pin, OUTPUT);
     pinMode(M_PWMPin, OUTPUT);
-
-
-    
-  if (!CAN.begin(500E3)) {
-    while (1) {
-      Serial.println("Starting CAN failed!");
-    }
-  }
 }
 
+// *****************************************************************
 void loop() {
 
   int target = get_angle();
 
- // Serial.println(target);
+// Serial.println(target);
 
   if (controls_allowed) {
     digitalWrite(solenoid_pin, HIGH);
@@ -61,7 +55,7 @@ void loop() {
   }
 
   if ((millis() - lagtime) >= 5) {
-    //read potpin every 100 ms
+    //read potpin every 5 ms
     currentAngle = ((float)analogRead(potPin) - POT_VALUE_MIN) / (POT_VALUE_MAX - POT_VALUE_MIN) * MAX_ANGLE;
     lagtime = millis();
   }
@@ -88,7 +82,7 @@ int get_angle() {
 
   switch (CAN.packetId())
   {
-    case 0x1d2:
+    case 0x1d2:   // 0x1d2 is PCM_CRUISE // CRUISE_ACTIVE
       uint8_t dat8[8];
       for (int ii = 0; ii <= 7; ii++) {
         dat8[ii]  = (char) CAN.read();
@@ -99,7 +93,7 @@ int get_angle() {
         if ((dat8[0] >> 5) & 0x01) {
           //enable controls
           controls_allowed = true;
-//         Serial.println("controls_allowed!");
+//        Serial.println("controls_allowed!");
         }
       }
       else {
@@ -109,7 +103,7 @@ int get_angle() {
       }
       break;
 
-    case 0x200:
+    case 0x200: // 0x200 is GAS_COMMAND
       lastmillis = millis();
       uint8_t dat[8];
       for (int ii = 0; ii <= 7; ii++) {
@@ -119,19 +113,19 @@ int get_angle() {
         //respect PCM_CANCEL
         if ((dat[3] << 7 & 0x80) == 1) {
           controls_allowed = false;
-          Serial.println("Line 118 CANCEL!");
+          Serial.println("Line 116 controls_allowed=false");
         }
-        //bitwise math to get target accel value in m/s^2
+        //GAS minus offset (-477)
         gas = ((dat[0] << 8 | dat[1] << 0)-477);
         
         //clip if gas exceeds limits
-        if ((gas >= 0) && (gas < 3000)) {
+        if ((gas >= 0) && (gas < 1000)) {
           angle = gas;
      Serial.println(gas);
         }
       
       else {
-   Serial.println("BRAKE ln 131");
+     Serial.println("ERROR ln 128");
      controls_allowed = false;
      angle = 0;
       }
@@ -142,20 +136,16 @@ int get_angle() {
 
   
 // SAFETY CHECK - did we recieve 343 in a reasonable amount of time?
- if ((millis() - lastmillis) > 1000) {
-      Serial.println("ERROR Line 143 BAD CHECKSUM 0x343");
+ if ((millis() - lastmillis) > 100) {
+      Serial.println("ERROR Line 140 BAD CHECKSUM 0x343");
       controls_allowed = false;
-      gas = 0;
-      angle = 0;
+   
   }
   return angle;
 
 }
 
 void cancel() {
-  controls_allowed = false;
-  gas = 0;
-  angle = 0;
   digitalWrite(solenoid_pin, LOW);
   Serial.println("INTERUPPED");
 }
