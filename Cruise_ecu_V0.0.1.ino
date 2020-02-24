@@ -1,4 +1,6 @@
 /*
+
+THIS VERSION IS TO ENABLE OP WITHOUT ANYTHING ELSE
 ****** PINOUTS ******
 
     BUTTONS
@@ -388,13 +390,48 @@ void loop() {
     CAN.write(dat11[ii]);
   }
   CAN.endPacket();
+    
+  //0x262 fake EPS_STATUS
+  uint8_t dat8[8];
+  dat8[0] = 0x0;
+  dat8[1] = 0x0;
+  dat8[2] = 0x0;
+  dat8[3] = 0x3;
+  dat8[4] = 0x6c;
 
+  CAN.beginPacket(0x262);
+  for (int ii = 0; ii < 5; ii++) {
+    CAN.write(dat8[ii]);
+  }
+  CAN.endPacket();
+    
+  //0x260 fake STEER_TORQUE_SENSOR  
+  uint8_t dat9[8];
+  dat9[0] = 0x08;
+  dat9[1] = 0xff;
+  dat9[2] = 0xfb;
+  dat9[3] = 0x0;
+  dat9[4] = 0x0;
+  dat9[5] = 0xff;
+  dat9[6] = 0xdc;
+  dat9[7] = 0x47;
+    
+  CAN.beginPacket(0x260);
+  for (int ii = 0; ii < 8; ii++) {
+    CAN.write(dat9[ii]);
+  }
+  CAN.endPacket();
+  
+  //0x423 fake EPS message 
+  CAN.beginPacket(0x423);
+  CAN.write(0x00);
+  CAN.endPacket();
+    
   // 0xb4 speed and encoder for throttle ECU
-
-uint16_t kmh = (average * 100);
-CAN.beginPacket(0xb4);
-CAN.print(kmh);
-CAN.endPacket();
+  uint16_t kmh = (average * 100);
+  CAN.beginPacket(0xb4);
+  CAN.print(kmh);
+  CAN.endPacket();
 
 
 
