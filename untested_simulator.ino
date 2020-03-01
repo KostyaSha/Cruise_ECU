@@ -14,17 +14,33 @@ int gas_pedal_state = 1;
 int brake_pedal_state = 1;
 
 //________________average(current speed in km/h)
-double average = 55;    
+double average = 50;
 
 void setup() {
-//________________start the CAN bus at 500 kbps
-CAN.begin(500E3);
+  //________________start the Serial
+  Serial.begin(250000);
+
+  CAN.setPins(9, 2);
+  //________________start the CAN bus at 500 kbps
+  if (!CAN.begin(500E3)) {
+    Serial.println("Starting CAN failed!");
+    while (1);
+  }
 }
 
 void loop() {
-    
+  //________________serial read for Buttons
+  if (Serial.available() > 0) {
+    String s1 = Serial.readStringUntil('\n');
+    if (s1 == "a") {
+      flag1 = !flag1;
+    }
+    if (s1 == "b") {
+      flag2 = !flag2;
+    }
+  }
 
-//________________send Fingerprint msgs
+  //________________send Fingerprint msgs
   for (int ii = 0; ii < 3; ii++) {
     CAN.beginPacket(addr[ii]);
     for (int i = 0; i < 8; i++) {
@@ -33,7 +49,7 @@ void loop() {
     CAN.endPacket();
   }
 
-//________________0x1d2 msg PCM_CRUISE
+  //________________send 0x1d2 msg PCM_CRUISE
   uint8_t dat[8];
   dat[0] = (flag2 << 5) & 0x20 | (!gas_pedal_state << 4) & 0x10;
   dat[1] = 0x0;
@@ -49,7 +65,7 @@ void loop() {
   }
   CAN.endPacket();
 
-//________________0x1d3 msg PCM_CRUISE_2
+  //________________send 0x1d3 msg PCM_CRUISE_2
   uint8_t dat2[8];
   dat2[0] = 0x0;
   dat2[1] = (flag1 << 7) & 0x80 | 0x28;
@@ -65,7 +81,7 @@ void loop() {
   }
   CAN.endPacket();
 
-//________________0xaa msg defaults 1a 6f WHEEL_SPEEDS
+  //________________send 0xaa msg defaults 1a 6f WHEEL_SPEEDS
   uint8_t dat3[8];
   uint16_t wheelspeed = 0x1a6f + (average * 100);
   dat3[0] = (wheelspeed >> 8) & 0xFF;
@@ -82,7 +98,7 @@ void loop() {
   }
   CAN.endPacket();
 
-//________________0x3b7 msg ESP_CONTROL
+  //________________send 0x3b7 msg ESP_CONTROL
   uint8_t dat5[8];
   dat5[0] = 0x0;
   dat5[1] = 0x0;
@@ -98,7 +114,7 @@ void loop() {
   }
   CAN.endPacket();
 
-//________________0x620 msg STEATS_DOORS
+  //________________send 0x620 msg STEATS_DOORS
   uint8_t dat6[8];
   dat6[0] = 0x10;
   dat6[1] = 0x0;
@@ -114,7 +130,7 @@ void loop() {
   }
   CAN.endPacket();
 
-//________________0x3bc msg GEAR_PACKET
+  //________________send 0x3bc msg GEAR_PACKET
   uint8_t dat7[8];
   dat7[0] = 0x0;
   dat7[1] = 0x0;
@@ -130,7 +146,7 @@ void loop() {
   }
   CAN.endPacket();
 
-//________________0x2c1 msg GAS_PEDAL
+  //________________send 0x2c1 msg GAS_PEDAL
   uint8_t dat10[8];
   dat10[0] = (!gas_pedal_state << 3) & 0x08;
   dat10[1] = 0x0;
@@ -146,7 +162,7 @@ void loop() {
   }
   CAN.endPacket();
 
-//________________0x224 msg fake brake module
+  //________________send 0x224 msg fake brake module
   uint8_t dat11[8];
   dat11[0] = 0x0;
   dat11[1] = 0x0;
@@ -161,8 +177,8 @@ void loop() {
     CAN.write(dat11[ii]);
   }
   CAN.endPacket();
-    
-//________________0x262 fake EPS_STATUS
+
+  //________________send 0x262 fake EPS_STATUS
   uint8_t dat8[8];
   dat8[0] = 0x0;
   dat8[1] = 0x0;
@@ -174,8 +190,8 @@ void loop() {
     CAN.write(dat8[ii]);
   }
   CAN.endPacket();
-    
-//________________0x260 fake STEER_TORQUE_SENSOR  
+
+  //________________send 0x260 fake STEER_TORQUE_SENSOR
   uint8_t dat9[8];
   dat9[0] = 0x08;
   dat9[1] = 0xff;
@@ -184,24 +200,48 @@ void loop() {
   dat9[4] = 0x0;
   dat9[5] = 0xff;
   dat9[6] = 0xdc;
-  dat9[7] = 0x47;  
+  dat9[7] = 0x47;
   CAN.beginPacket(0x260);
   for (int ii = 0; ii < 8; ii++) {
     CAN.write(dat9[ii]);
   }
   CAN.endPacket();
-  
-//________________0x423 fake EPS message 
+
+  //________________send 0x423 fake EPS message
   CAN.beginPacket(0x423);
   CAN.write(0x00);
   CAN.endPacket();
-    
-//________________0xb4 speed and encoder for throttle ECU
+
+  //________________send 0xb4 speed and encoder for throttle ECU
   uint16_t kmh = (average * 100);
   CAN.beginPacket(0xb4);
   CAN.print(kmh);
   CAN.endPacket();
-
+    
+  //________________read ACC_CMD from CANbus
+  CAN.parsePacket();
+  if (CAN.packetId() == 0x200)
+      {
+      uint8_t dat[8];
+      for (int ii = 0; ii <= 7; ii++) {
+        dat[ii]  = (char) CAN.read();
+        }
+        ACC_CMD = (dat[0] << 8 | dat[1] << 0); 
+       } 
+   //________________calculating ACC_CMD into ACC_CMD_PERCENT
+  if (ACC_CMD >= minACC_CMD) {
+      ACC_CMD1 = ACC_CMD;
+      }
+  else {
+      ACC_CMD1 = minACC_CMD;
+      }
+  ACC_CMD_PERCENT = ((100/(maxACC_CMD - minACC_CMD)) * (ACC_CMD1 - minACC_CMD));
+    
+  Serial.print("Gas pedal position");
+  Serial.print("__");
+  Serial.print(ACC_CMD_PERCENT);
+  Serial.print("%");
+  Serial.println("");
 
 }
 
