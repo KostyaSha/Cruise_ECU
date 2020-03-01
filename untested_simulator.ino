@@ -1,5 +1,9 @@
 #include <CAN.h>
 
+//________________this values needs to be define for each car
+float maxACC_CMD = 1430; //the max Value which comes from OP on CAN ID 0x200
+float minACC_CMD = 477; //the min Value which comes from OP on CAN ID 0x200
+
 //________________flags for cruise state
 boolean flag1 = true;
 boolean flag2 = true;
@@ -12,6 +16,9 @@ int data[] = {0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7};
 //________________pedal State
 int gas_pedal_state = 1;
 int brake_pedal_state = 1;
+float ACC_CMD_PERCENT = 0;
+float ACC_CMD = 0;
+float ACC_CMD1 = 0;
 
 //________________average(current speed in km/h)
 double average = 50;
