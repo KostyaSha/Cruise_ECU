@@ -1,7 +1,6 @@
 #include <CAN.h>
 
 //______________BUTTONS AND SWITCHES
-
 int button4 = 8;
 int button3 = 7;
 int button2 = 6;
@@ -57,8 +56,6 @@ pinMode(button4, INPUT);
   for (int thisReading = 0; thisReading < numReadings; thisReading++) {
     readings[thisReading] = 0;
   }
-
-
 }
 
 void loop() {
@@ -299,14 +296,12 @@ Serial.println("");
     CAN.write(dat8[ii]);
   }
   CAN.endPacket();
-
-
-delay(2);
 }
 
 void rpm() {
   half_revolutions++;
-  if (encoder > 255) {
+  if (encoder > 255)
+  {
     encoder = 0;
   }
   encoder++;
