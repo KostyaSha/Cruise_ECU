@@ -22,8 +22,8 @@ uint8_t set_speed = 0x0;
 int gas_pedal_state = 0; // TODO: Remove gas_pedal_state
 int brake_pedal_state = 0; // TODO: Remove brake_pedal_state
 double average = 0; 
-boolean blinker_left = false;
-boolean blinker_right = false;
+boolean blinker_left = true;
+boolean blinker_right = true;
 
 //______________FOR SMOOTHING SPD
 const int numReadings = 160;
@@ -111,28 +111,27 @@ if (buttonstate4 != lastbuttonstate4)
           else if(OP_ON == false)
           {
           OP_ON = true;
-          set_speed = average;
+          set_speed = (average += 3);
           }
         }
      }
 
 if (buttonstate3 == LOW)
    {
-   blinker_right = true;
-   Serial.println("Blinker_right_is_ON");
+   blinker_right = false;
    }
   else
    {
-   blinker_right = false;
-   Serial.println("Blinker_is_OFF");
+   blinker_right = true;
    }
-  
-if (buttonstate2 != lastbuttonstate2)
+
+if (buttonstate2 == LOW)
    {
-       if (buttonstate2 == LOW)
-       {
-       set_speed -= 5;
-       }
+   blinker_left = false;
+   }
+  else
+   {
+   blinker_left = true;
    }
 
 if (buttonstate1 != lastbuttonstate1)
@@ -153,10 +152,6 @@ lastbuttonstate2 = buttonstate2;
 lastbuttonstate3 = buttonstate3;
 lastbuttonstate4 = buttonstate4;
 
-
-Serial.print("OP_ON = ");
-Serial.print(OP_ON);
-Serial.println("");
 //______________SENDING_CAN_MESSAGES
 
   //0x1d2 msg PCM_CRUISE
@@ -289,18 +284,18 @@ Serial.println("");
   CAN.endPacket();
 
   //0x614 msg steering_levers
-  uint8_t dat8[8];
-  dat11[0] = 0x29;
-  dat11[1] = 0x80;
-  dat11[2] = 0x01;
-  dat11[3] = (blinker_left << 5) & 0x20 |(blinker_right << 4) & 0x10;
-  dat11[4] = 0x0;
-  dat11[5] = 0x0;
-  dat11[6] = 0x78;
-  dat11[7] = 0xe5;
+  uint8_t dat614[8];
+  dat614[0] = 0x29;
+  dat614[1] = 0x0;
+  dat614[2] = 0x01;
+  dat614[3] = (blinker_left << 5) & 0x20 |(blinker_right << 4) & 0x10;
+  dat614[4] = 0x0;
+  dat614[5] = 0x0;
+  dat614[6] = 0x76;
+  dat614[7] = can_cksum(dat614, 7, 0x614);
   CAN.beginPacket(0x614);
   for (int ii = 0; ii < 8; ii++) {
-    CAN.write(dat8[ii]);
+    CAN.write(dat614[ii]);
   }
   CAN.endPacket();
 }
