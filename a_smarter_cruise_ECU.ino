@@ -22,7 +22,8 @@ uint8_t set_speed = 0x0;
 int gas_pedal_state = 0; // TODO: Remove gas_pedal_state
 int brake_pedal_state = 0; // TODO: Remove brake_pedal_state
 double average = 0; 
-boolean blinker_on = true;
+boolean blinker_left = false;
+boolean blinker_right = false;
 
 //______________FOR SMOOTHING SPD
 const int numReadings = 160;
@@ -117,7 +118,7 @@ if (buttonstate4 != lastbuttonstate4)
 
 if (buttonstate3 == LOW)
    {
-    Serial.println("B3 is pressed");
+   blinker_right = true;
    }
 
 if (buttonstate2 != lastbuttonstate2)
@@ -283,14 +284,14 @@ Serial.println("");
 
   //0x614 msg steering_levers
   uint8_t dat8[8];
-  dat11[0] = 0x0;
-  dat11[1] = 0x0;
-  dat11[2] = 0x0;
-  dat11[3] = (blinker_on << 5);
+  dat11[0] = 0x29;
+  dat11[1] = 0x80;
+  dat11[2] = 0x01;
+  dat11[3] = (blinker_left << 5) & 0x20 |(blinker_right << 4) & 0x10;
   dat11[4] = 0x0;
   dat11[5] = 0x0;
-  dat11[6] = 0x0;
-  dat11[7] = 0x0;
+  dat11[6] = 0x78;
+  dat11[7] = 0xe5;
   CAN.beginPacket(0x614);
   for (int ii = 0; ii < 8; ii++) {
     CAN.write(dat8[ii]);
