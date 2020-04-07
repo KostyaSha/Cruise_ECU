@@ -119,8 +119,14 @@ if (buttonstate4 != lastbuttonstate4)
 if (buttonstate3 == LOW)
    {
    blinker_right = true;
+   Serial.println("Blinker_right_is_ON");
    }
-
+  else
+   {
+   blinker_right = false;
+   Serial.println("Blinker_is_OFF");
+   }
+  
 if (buttonstate2 != lastbuttonstate2)
    {
        if (buttonstate2 == LOW)
