@@ -1,6 +1,3 @@
-# OLD_CAR_ECU
-This Arduino skeches are needed if you want to install Openpilot in Old_cars
+# DO NOT USE ON PUBLIC ROAD!
 
-Please install can.h libary in arduino ide: 
-
-https://github.com/Lukilink/arduino-CAN
+This is unsafe and only for testing on Workbench, not in a car! 
