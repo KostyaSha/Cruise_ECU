@@ -308,7 +308,7 @@ lastbuttonstate4 = buttonstate4;
   CAN.parsePacket();
 
   //128x2e6 msg LEAD_INFO
-  if (CAN.packetId() == 128x2e6)
+  if (CAN.packetId() == 0x2e6)
       {
       uint8_t dat_LEAD_INFO[8];
       for (int ii = 0; ii <= 7; ii++) {
@@ -319,21 +319,21 @@ lastbuttonstate4 = buttonstate4;
         }
 
 //______________CONVERTING INTO RIGHT VALUE USING DBC SCALE
-LEAD_LONG_DIST = (LEAD_LONG_DIST_RAW *= 0,05);
-LEAD_REL_SPEED = (LEAD_REL_SPEED_RAW *= 0,09);
+LEAD_LONG_DIST = (LEAD_LONG_DIST_RAW *= 0.05);
+LEAD_REL_SPEED = (LEAD_REL_SPEED_RAW *= 0.09);
 
-serial.print ("LEAD_LONG_DIST ");
-serial.print (LEAD_LONG_DIST_RAW);
-serial.print (" --> ");
-serial.print (LEAD_LONG_DIST);
-serial.print ("m");
-serial.print ("         ");
-serial.print ("LEAD_REL_SPEED ");
-serial.print (LEAD_REL_SPEED_RAW);
-serial.print (" --> ");
-serial.print (LEAD_REL_SPEED);
-serial.print ("km/h");
-serial.println (""); 
+Serial.print ("LEAD_LONG_DIST ");
+Serial.print (LEAD_LONG_DIST_RAW);
+Serial.print (" --> ");
+Serial.print (LEAD_LONG_DIST);
+Serial.print ("m");
+Serial.print ("         ");
+Serial.print ("LEAD_REL_SPEED ");
+Serial.print (LEAD_REL_SPEED_RAW);
+Serial.print (" --> ");
+Serial.print (LEAD_REL_SPEED);
+Serial.print ("km/h");
+Serial.println (""); 
   
 }
 
