@@ -24,6 +24,11 @@ int brake_pedal_state = 0; // TODO: Remove brake_pedal_state
 double average = 0; 
 boolean blinker_left = true;
 boolean blinker_right = true;
+float LEAD_LONG_DIST = 0;
+float LEAD_REL_SPEED = 0;
+float LEAD_LONG_DIST_RAW = 0;
+float LEAD_REL_SPEED_RAW = 0;
+
 
 //______________FOR SMOOTHING SPD
 const int numReadings = 160;
@@ -298,6 +303,38 @@ lastbuttonstate4 = buttonstate4;
     CAN.write(dat614[ii]);
   }
   CAN.endPacket();
+
+//______________READING CAN
+  CAN.parsePacket();
+
+  //128x2e6 msg LEAD_INFO
+  if (CAN.packetId() == 128x2e6)
+      {
+      uint8_t dat_LEAD_INFO[8];
+      for (int ii = 0; ii <= 7; ii++) {
+        dat_LEAD_INFO[ii]  = (char) CAN.read();
+        }
+        LEAD_LONG_DIST_RAW = (dat_LEAD_INFO[0] << 8 | dat_LEAD_INFO[1] << 3); 
+        LEAD_REL_SPEED_RAW = (dat_LEAD_INFO[2] << 8 | dat_LEAD_INFO[3] << 4);
+        }
+
+//______________CONVERTING INTO RIGHT VALUE USING DBC SCALE
+LEAD_LONG_DIST = (LEAD_LONG_DIST_RAW *= 0,05);
+LEAD_REL_SPEED = (LEAD_REL_SPEED_RAW *= 0,09);
+
+serial.print ("LEAD_LONG_DIST ");
+serial.print (LEAD_LONG_DIST_RAW);
+serial.print (" --> ");
+serial.print (LEAD_LONG_DIST);
+serial.print ("m");
+serial.print ("         ");
+serial.print ("LEAD_REL_SPEED ");
+serial.print (LEAD_REL_SPEED_RAW);
+serial.print (" --> ");
+serial.print (LEAD_REL_SPEED);
+serial.print ("km/h");
+serial.println (""); 
+  
 }
 
 void rpm() {
