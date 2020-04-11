@@ -42,7 +42,8 @@ uint8_t encoder = 0;
 
 
 void setup() {
-
+  
+Serial.begin(9600);
 CAN.begin(500E3);
 
 pinMode(interruptPin, INPUT_PULLUP);
@@ -143,6 +144,7 @@ if (buttonstate1 != lastbuttonstate1)
     
 if (pedalstate == LOW)
    {
+    Serial.println("Pedal is pressed");
    }
 
 lastbuttonstate1 = buttonstate1;
