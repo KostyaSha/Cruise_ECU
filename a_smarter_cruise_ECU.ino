@@ -254,22 +254,6 @@ lastbuttonstate4 = buttonstate4;
   }
   CAN.endPacket();
 
-  //0x224 msg fake brake module
-  uint8_t dat11[8];
-  dat11[0] = 0x0;
-  dat11[1] = 0x0;
-  dat11[2] = 0x0;
-  dat11[3] = 0x0;
-  dat11[4] = 0x0;
-  dat11[5] = 0x0;
-  dat11[6] = 0x0;
-  dat11[7] = 0x8;
-  CAN.beginPacket(0x224);
-  for (int ii = 0; ii < 8; ii++) {
-    CAN.write(dat11[ii]);
-  }
-  CAN.endPacket();
-
   //0x614 msg steering_levers
   uint8_t dat614[8];
   dat614[0] = 0x29;
