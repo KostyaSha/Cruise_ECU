@@ -26,6 +26,7 @@ float LEAD_LONG_DIST = 0;
 float LEAD_REL_SPEED = 0;
 float LEAD_LONG_DIST_RAW = 0;
 float LEAD_REL_SPEED_RAW = 0;
+boolean BRAKE_PRESSED = true;
 
 
 //______________FOR SMOOTHING SPD
@@ -283,6 +284,17 @@ lastbuttonstate4 = buttonstate4;
         LEAD_LONG_DIST_RAW = (dat_LEAD_INFO[0] << 8 | dat_LEAD_INFO[1] << 3); 
         LEAD_REL_SPEED_RAW = (dat_LEAD_INFO[2] << 8 | dat_LEAD_INFO[3] << 4);
         }
+  
+  //0x224 msg BRAKE_MODULE
+    if (CAN.packetId() == 0x224)
+      {
+      uint8_t dat_224[8];
+      for (int ii = 0; ii <= 7; ii++) {
+        dat_224[ii]  = (char) CAN.read();
+        }
+        BRAKE_PRESSED = (dat_224[0] << 5);
+        }
+Serial.println(BRAKE_PRESSED);
   
 }
 
