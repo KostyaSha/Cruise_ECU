@@ -19,8 +19,6 @@ int lastbuttonstate1;
 //______________VALUES SEND ON CAN
 boolean OP_ON = false;
 uint8_t set_speed = 0x0;
-int gas_pedal_state = 0; // TODO: Remove gas_pedal_state
-int brake_pedal_state = 0; // TODO: Remove brake_pedal_state
 double average = 0; 
 boolean blinker_left = true;
 boolean blinker_right = true;
@@ -161,7 +159,7 @@ lastbuttonstate4 = buttonstate4;
 
   //0x1d2 msg PCM_CRUISE
   uint8_t dat[8];
-  dat[0] = (OP_ON << 5) & 0x20 | (!gas_pedal_state << 4) & 0x10;
+  dat[0] = (OP_ON << 5) & 0x20;
   dat[1] = 0x0;
   dat[2] = 0x0;
   dat[3] = 0x0;
@@ -256,22 +254,6 @@ lastbuttonstate4 = buttonstate4;
   }
   CAN.endPacket();
 
-  // 0x2c1 msg GAS_PEDAL
-  uint8_t dat10[8];
-  dat10[0] = (!gas_pedal_state << 3) & 0x08;
-  dat10[1] = 0x0;
-  dat10[2] = 0x0;
-  dat10[3] = 0x0;
-  dat10[4] = 0x0;
-  dat10[5] = 0x0;
-  dat10[6] = 0x0;
-  dat10[7] = 0x0;
-  CAN.beginPacket(0x2c1);
-  for (int ii = 0; ii < 8; ii++) {
-    CAN.write(dat10[ii]);
-  }
-  CAN.endPacket();
-
   //0x224 msg fake brake module
   uint8_t dat11[8];
   dat11[0] = 0x0;
@@ -317,23 +299,6 @@ lastbuttonstate4 = buttonstate4;
         LEAD_LONG_DIST_RAW = (dat_LEAD_INFO[0] << 8 | dat_LEAD_INFO[1] << 3); 
         LEAD_REL_SPEED_RAW = (dat_LEAD_INFO[2] << 8 | dat_LEAD_INFO[3] << 4);
         }
-
-//______________CONVERTING INTO RIGHT VALUE USING DBC SCALE
-LEAD_LONG_DIST = (LEAD_LONG_DIST_RAW *= 0.05);
-LEAD_REL_SPEED = (LEAD_REL_SPEED_RAW *= 0.09);
-
-Serial.print ("LEAD_LONG_DIST ");
-Serial.print (LEAD_LONG_DIST_RAW);
-Serial.print (" --> ");
-Serial.print (LEAD_LONG_DIST);
-Serial.print ("m");
-Serial.print ("         ");
-Serial.print ("LEAD_REL_SPEED ");
-Serial.print (LEAD_REL_SPEED_RAW);
-Serial.print (" --> ");
-Serial.print (LEAD_REL_SPEED);
-Serial.print ("km/h");
-Serial.println (""); 
   
 }
 
