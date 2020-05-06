@@ -138,16 +138,16 @@ void comma_communication() {
   }
   CAN.endPacket();
 
-  //________________0x262 fake EPS_STATUS
-  uint8_t dat8[8];
-  dat8[0] = 0x0;
-  dat8[1] = 0x0;
-  dat8[2] = 0x0;
-  dat8[3] = 0x3;
-  dat8[4] = 0x6c;
+  //________________send 0x262 fake EPS_STATUS
+  uint8_t dat262[8];
+  dat262[0] = 0x0;
+  dat262[1] = 0x18;
+  dat262[2] = 0x0;
+  dat262[3] = (LKA_STATE << 7) & 0x40 | (TYPE << 0) & 0x1;
+  dat262[4] = can_cksum(dat262, 7, 0x262);
   CAN.beginPacket(0x262);
   for (int ii = 0; ii < 5; ii++) {
-    CAN.write(dat8[ii]);
+    CAN.write(dat262[ii]);
   }
   CAN.endPacket();
 
@@ -170,12 +170,6 @@ void comma_communication() {
   //________________0x423 fake EPS message
   CAN.beginPacket(0x423);
   CAN.write(0x00);
-  CAN.endPacket();
-
-  //________________0xb4 speed and encoder for throttle ECU
-  uint16_t kmh = (average * 100);
-  CAN.beginPacket(0xb4);
-  CAN.print(kmh);
   CAN.endPacket();
 
 }
