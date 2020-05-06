@@ -191,13 +191,10 @@ void loop() {
   //________________send 0x262 fake EPS_STATUS
   uint8_t dat262[8];
   dat262[0] = 0x0;
-  dat262[1] = 0x0;
+  dat262[1] = 0x18;
   dat262[2] = 0x0;
   dat262[3] = (LKA_STATE << 7) & 0x40 | (TYPE << 0) & 0x1;
-  dat262[4] = 0x0;
-  dat262[5] = 0x0;
-  dat262[6] = 0x0;
-  dat262[7] = can_cksum(dat262, 7, 0x262);
+  dat262[4] = can_cksum(dat262, 7, 0x262);
   CAN.beginPacket(0x262);
   for (int ii = 0; ii < 5; ii++) {
     CAN.write(dat262[ii]);
