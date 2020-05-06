@@ -8,6 +8,9 @@ float minACC_CMD = 477; //the min Value which comes from OP on CAN ID 0x200
 boolean flag1 = true;
 boolean flag2 = true;
 
+int LKA_STATE = 5;
+int TYPE = 0;
+
 //________________CAN default messages
 uint8_t set_speed = 0x0;
 int addr[] = {0xfd, 0xfe, 0xff};
@@ -186,15 +189,18 @@ void loop() {
   CAN.endPacket();
 
   //________________send 0x262 fake EPS_STATUS
-  uint8_t dat8[8];
-  dat8[0] = 0x0;
-  dat8[1] = 0x0;
-  dat8[2] = 0x0;
-  dat8[3] = 0x3;
-  dat8[4] = 0x6c;
+  uint8_t dat262[8];
+  dat262[0] = 0x0;
+  dat262[1] = 0x0;
+  dat262[2] = 0x0;
+  dat262[3] = (LKA_STATE << 7) & 0x40 | (TYPE << 0) & 0x1;
+  dat262[4] = 0x0;
+  dat262[5] = 0x0;
+  dat262[6] = 0x0;
+  dat262[7] = can_cksum(dat262, 7, 0x262);
   CAN.beginPacket(0x262);
   for (int ii = 0; ii < 5; ii++) {
-    CAN.write(dat8[ii]);
+    CAN.write(dat262[ii]);
   }
   CAN.endPacket();
 
