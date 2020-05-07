@@ -150,6 +150,22 @@ void comma_communication() {
     CAN.write(dat262[ii]);
   }
   CAN.endPacket();
+  
+  //________________0x25 fake STEER_ANGLE
+  uint8_t dat25[8];
+  dat25[0] = 0x0f;
+  dat25[1] = 0xff;
+  dat25[2] = 0x00;
+  dat25[3] = 0x01;
+  dat25[4] = 0xc0;
+  dat25[5] = 0x03;
+  dat25[6] = 0x00;
+  dat25[7] = 0xff;
+  CAN.beginPacket(0x25);
+  for (int ii = 0; ii < 8; ii++) {
+    CAN.write(dat25[ii]);
+  }
+  CAN.endPacket();
 
   //________________0x260 fake STEER_TORQUE_SENSOR
   uint8_t dat9[8];
